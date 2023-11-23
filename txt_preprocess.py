@@ -39,21 +39,24 @@ def main(file):
     pattern_en_zh = re.compile(r'([a-zA-Z0-9]+)([\u4e00-\u9fa5]+)')
     pattern_lab = re.compile(r'\blab\b', re.IGNORECASE)
     pattern_labmem = re.compile(r'\blabmem\b|\blabman\b', re.IGNORECASE)
+    PUNCTUATIONS = ['。', '？', '！', '—', '…']
 
     with open(file, 'r') as f:
         for line in f.readlines():
+            # print(repr(line))
+            if line == '\n':
+                continue
             if line[-1] == '\n':
                 line = line[:-1]
             line = re.sub(pattern_zh_en, r'\1 \2', line)
             line = re.sub(pattern_en_zh, r'\1 \2', line)
             line = re.sub(pattern_lab, r'LAB', line)
             line = re.sub(pattern_labmem, r'LABMem', line)
-            # print(line)
-            if line[-1] != '。':
-                lines.append( '“'+line+"。”  \n")
+            if line[-1] not in PUNCTUATIONS:
+                lines.append(f"“{line}”。  \n")
             else:
-                lines.append( '“'+line+"”  \n")
-
+                lines.append(f"“{line}”  \n")
+            
     try:
         import pyperclip
     except ImportError:
@@ -62,12 +65,13 @@ def main(file):
         filename, ext = os.path.splitext(os.path.basename(file))
         with open(os.path.join(path, filename+"_new", ext),'w', encoding='utf-8') as f:
             f.writelines(lines)
+        print("Saved as file.")
     else:
         pyperclip.copy(''.join(lines))
-
+        print("Copied to clipboard.")
+    os.system("pause")
 
 
 if len(sys.argv)>1 & os.path.isfile(sys.argv[1]):
     main(sys.argv[1])
 
-# os.system('pause')
